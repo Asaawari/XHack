@@ -1,0 +1,3109 @@
+Enhancing AI Fashion Assistant with Name-Based Style
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/@google/generative-ai/dist/browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStyle - AI Fashion Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        :root {
+            --primary: #102C57;    /* Dark blue */
+            --secondary: #1679AB;  /* Medium blue */
+            --accent1: #bf6d6d;    /* Light pink */
+            --accent2: #FFCBCB;    /* Very light pink */
+            --dark: #102C57;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Add this to your existing CSS */
+select.form-input {
+    color: var(--dark); /* Change text color to dark */
+    background-color: white; /* Ensure background is white */
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.3); /* Darker border for contrast */
+}
+
+select.form-input option {
+    color: var(--dark); /* Dark text for options */
+    background-color: white; /* White background for options */
+}
+
+/* Keep the existing dropdown arrow styling */
+select.form-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23102C57'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    padding-right: 35px;
+}
+
+        /* Add to your existing CSS */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #120c3a;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: #120c3a;
+    font-size: 1rem;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent1);
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+select.form-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    padding-right: 35px;
+}
+        
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled {
+            padding: 10px 0;
+            background: rgba(16, 44, 87, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent1);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+        
+        nav ul li a:hover {
+            color: var(--accent1);
+        }
+        
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--accent1);
+            bottom: -5px;
+            left: 0;
+            transition: width 0.3s ease;
+        }
+        
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(16, 44, 87, 0.7), rgba(16, 44, 87, 0.7)), 
+                        url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            margin-top: 0;
+            padding-top: 80px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            padding: 20px;
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(22, 121, 171, 0.4);
+        }
+        
+        .btn:hover {
+            background: var(--accent1);
+            color: var(--dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 177, 177, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid white;
+            margin-left: 15px;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background-color: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 2.8rem;
+            color: var(--primary);
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease;
+            border: 1px solid var(--accent2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--secondary);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(22, 121, 171, 0.15);
+        }
+        
+        .feature-icon {
+            font-size: 3.5rem;
+            color: var(--secondary);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .feature-desc {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 100px 0;
+            background-color: var(--accent2);
+            position: relative;
+        }
+        
+        .how-it-works::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: white;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 100%);
+        }
+        
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 40px 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent1);
+        }
+        
+        .step:hover {
+            transform: translateY(-10px);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(22, 121, 171, 0.3);
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* Wardrobe Upload */
+        .wardrobe-upload {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wardrobe-upload::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: var(--accent2);
+            clip-path: polygon(0 100%, 100% 0, 100% 100%);
+        }
+        
+        .upload-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #c69494;
+        }
+        
+        .upload-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .upload-desc {
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .upload-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: #c69494;
+            color: var(--primary);
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.1rem;
+        }
+        
+        .upload-btn:hover {
+            background: var(--accent2);
+            transform: translateY(-3px);
+        }
+        
+        .file-requirements {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Future Scope */
+        .future-scope {
+            padding: 100px 0;
+            background-color: white;
+        }
+        
+        .future-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .future-card {
+            background: var(--accent2);
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .future-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(255, 177, 177, 0.2);
+        }
+        
+        .future-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            font-weight: 700;
+            color: rgba(22, 121, 171, 0.1);
+            z-index: 0;
+        }
+        
+        .future-card h3 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .future-card p {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 100px 0;
+            background-color: var(--accent2);
+            position: relative;
+        }
+        
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .testimonial {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent1);
+            position: relative;
+        }
+        
+        .testimonial:hover {
+            transform: translateY(-10px);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .testimonial-text::before {
+            content: '"';
+            position: absolute;
+            left: 0;
+            top: -10px;
+            font-size: 3rem;
+            color: var(--accent1);
+            opacity: 0.3;
+            line-height: 1;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .author-info h4 {
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        
+        .author-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Newsletter */
+        .newsletter {
+            padding: 80px 0;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+        
+        .newsletter-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .newsletter h2 {
+            margin-bottom: 20px;
+        }
+        
+        .newsletter p {
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .newsletter-form {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .newsletter-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px 0 0 30px;
+            font-size: 1rem;
+        }
+        
+        .newsletter-btn {
+            padding: 15px 30px;
+            background: var(--accent1);
+            color: var(--primary);
+            border: none;
+            border-radius: 0 30px 30px 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .newsletter-btn:hover {
+            background: var(--accent2);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 80px 0 20px;
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: var(--accent2);
+            clip-path: polygon(0 0, 100% 100%, 100% 0);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        /* Add this to your CSS */
+.outfit {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.outfit-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.outfit-style {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.outfit-style.business {
+    background: #d6eaf8;
+    color: #2c3e50;
+}
+
+.outfit-style.formal {
+    background: #e8daef;
+    color: #8e44ad;
+}
+
+.outfit-style.casual {
+    background: #fadbd8;
+    color: #c0392b;
+}
+
+.outfit-style.business-casual {
+    background: #d5f5e3;
+    color: #27ae60;
+}
+
+.outfit-desc {
+    color: var(--gray);
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+.outfit-confidence {
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+.no-outfits {
+    text-align: center;
+    padding: 30px;
+    color: var(--gray);
+}
+
+.no-outfits i {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--accent1);
+}
+
+.save-outfit {
+    background: var(--accent1);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.save-outfit:hover {
+    background: var(--secondary);
+}
+
+.save-outfit i {
+    font-size: 0.9rem;
+}
+        .footer-column h3 {
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            color: var(--accent1);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--accent1);
+        }
+        
+        .footer-about p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links ul li {
+            margin-bottom: 12px;
+        }
+        .outfit {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .outfit-items {
+        display: flex;
+        gap: 15px;
+        margin: 15px 0;
+        flex-wrap: wrap;
+    }
+    
+    .outfit-item {
+        width: 120px;
+        text-align: center;
+    }
+    
+    .outfit-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    
+    .save-outfit {
+        background: var(--secondary);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+        .footer-links ul li a {
+            color: var(--accent2);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        
+        .footer-links ul li a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .footer-contact p {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-contact i {
+            margin-right: 10px;
+            color: var(--accent1);
+            width: 20px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: var(--accent1);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 203, 203, 0.2);
+            color: var(--accent2);
+            font-size: 0.9rem;
+        }
+        
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+            box-shadow: 0 5px 15px rgba(22, 121, 171, 0.3);
+        }
+        
+        .back-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background: var(--accent1);
+            color: var(--primary);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .color-filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    
+    .color-filter {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 20px;
+        background: #eee;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .color-filter.active {
+        background: var(--secondary);
+        color: white;
+    }
+    
+    .wardrobe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .wardrobe-item {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .wardrobe-item:hover {
+        transform: translateY(-5px);
+    }
+    
+    .wardrobe-item-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .wardrobe-item-info {
+        padding: 15px;
+    }
+    
+    .wardrobe-item-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .wardrobe-item-category {
+        color: var(--gray);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .wardrobe-item-colors {
+        display: flex;
+        gap: 5px;
+        margin-top: 10px;
+    }
+    
+    .color-chip {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1px solid #ddd;
+    }
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-submit {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        /* Add this to your CSS */
+.style-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.style-filter {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    background: #eee;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.style-filter.active {
+    background: var(--secondary);
+    color: white;
+}
+
+.style-filter[data-style="business"] {
+    border-left: 4px solid #2c3e50;
+}
+
+.style-filter[data-style="formal"] {
+    border-left: 4px solid #8e44ad;
+}
+
+.style-filter[data-style="casual"] {
+    border-left: 4px solid #e74c3c;
+}
+
+.style-filter[data-style="business-casual"] {
+    border-left: 4px solid #3498db;
+}
+
+.style-filter:hover:not(.active) {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+        .form-submit:hover {
+            background: var(--accent1);
+        }
+        
+        .form-footer {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .form-footer a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .section-title {
+                font-size: 2.3rem;
+            }
+        }
+
+        /* Add to your existing CSS */
+.gory {
+    grid-column: 1 / -1;
+    margin-bottom: 30px;
+}
+
+.wardrobe-category {
+    grid-column: 1 / -1;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.category-title {
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent1);
+    display: flex;
+    align-items: center;
+}
+
+.category-title::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    background-color: var(--accent1);
+    border-radius: 50%;
+}
+
+.category-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.style-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    border-radius: 10px;
+    margin-top: 5px;
+    background: #eee;
+}
+
+.style-tag.casual {
+    background: #fadbd8;
+    color: #c0392b;
+}
+
+.style-tag.formal {
+    background: #e8daef;
+    color: #8e44ad;
+}
+
+.style-tag.business {
+    background: #d6eaf8;
+    color: #2c3e50;
+}
+
+.style-tag.business-casual {
+    background: #d5f5e3;
+    color: #27ae60;
+}
+        
+        @media (max-width: 768px) {
+            hewardrobe-cateader {
+                padding: 15px 0;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav {
+                margin-top: 15px;
+            }
+            
+            nav ul li {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+            
+            .hero {
+                padding-top: 120px;
+                height: auto;
+                padding-bottom: 80px;
+            }
+            
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .btn-container {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn-secondary {
+                margin-left: 0;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+            }
+            
+            .newsletter-input {
+                border-radius: 30px;
+                margin-bottom: 10px;
+            }
+            
+            .newsletter-btn {
+                border-radius: 30px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .feature-card, .step, .testimonial, .future-card {
+                padding: 30px 20px;
+            }
+            
+            .upload-container {
+                padding: 30px 20px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-tshirt"></i>
+                SmartStyle
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#" id="wardrobe-link">My Wardrobe</a></li>
+                        <li><a href="#wardrobe">Wardrobe Upload</a></li>
+                        <li><a href="#trends">Trends</a></li>
+                        <li><a href="#shop">Shopping</a></li>
+                        <li><a href="#future">Future</a></li>
+                    <li><a href="#" id="auth-button">Login</a></li>
+                </ul>
+            </nav>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Discover Your Perfect Style</h1>
+            <p>SmartStyle revolutionizes how teens approach fashion with AI-powered outfit recommendations, wardrobe organization, and trend discovery—all tailored to your unique taste.</p>
+            <div class="btn-container">
+                <a href="#wardrobe" class="btn">Start Styling</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">OUR SOLUTION</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👚</div>
+                    <h3 class="feature-title">Organizes Wardrobe</h3>
+                    <p>Automatically categorize and organize your clothing items for easy access and mixing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👗</div>
+                    <h3 class="feature-title">Discovers Trends</h3>
+                    <p>Stay up-to-date with the latest youth-centric fashion trends tailored to your style.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👔</div>
+                    <h3 class="feature-title">Visualizes Looks</h3>
+                    <p>See how different pieces work together before you wear them with our style visualizer.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👖</div>
+                    <h3 class="feature-title">Plans Outfits</h3>
+                    <p>Get AI-powered outfit suggestions based on weather, occasion, and your personal taste.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛍️</div>
+                    <h3 class="feature-title">Shopping Suggestions</h3>
+                    <p>Find affordable pieces that complement your existing wardrobe and personal style.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📞</div>
+                    <h3 class="feature-title">Get in Touch</h3>
+                    <p>Subscribe and drop a mail anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">HOW IT WORKS</h2>
+            <p class="section-subtitle">Getting started with SmartStyle is simple and takes just minutes</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Upload Your Wardrobe</h3>
+                    <p>Snap photos of your clothing items or import from your camera roll. Our AI does the rest!</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Set Your Preferences</h3>
+                    <p>Tell us your style, favorite colors, and budget to personalize recommendations.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Get Outfit Ideas</h3>
+                    <p>Receive endless outfit combinations tailored to your schedule and the weather.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">Shop Smart</h3>
+                    <p>Discover affordable pieces that perfectly complement your existing wardrobe.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Wardrobe Upload -->
+    <!-- <section class="wardrobe-upload" id="wardrobe">
+        <div class="container">
+            <div class="upload-container">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h2 class="upload-title">Build Your Digital Wardrobe</h2>
+                <p class="upload-desc">Upload photos of your clothing items to unlock personalized outfit recommendations and smart wardrobe organization.</p>
+                
+                <form id="upload-form">
+                    <input type="file" id="file-upload" name="file" style="display: none;" accept="image/*">
+                    <input type="text" id="item-name" placeholder="Item name" style="display: none; width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;">
+                    <label for="file-upload" class="upload-btn" id="upload-btn">
+                        <i class="fas fa-camera"></i> Upload Your Clothes
+                    </label>
+                    <div id="upload-progress" style="margin-top: 20px; display: none;">
+                        <progress value="0" max="100" style="width: 100%; height: 10px; border-radius: 5px;"></progress>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">Uploading... <span id="progress-percent">0</span>%</p>
+                    </div>
+                    <div id="upload-result" style="margin-top: 15px; color: white;"></div>
+                </form>
+                
+                <p class="file-requirements">Supported formats: JPG, PNG. Max file size: 5MB</p>
+            </div>
+            
+        </div>
+    </section> -->
+<!-- Wardrobe Upload -->
+<section class="wardrobe-upload" id="wardrobe">
+    <div class="container">
+        <div class="upload-container">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h2 class="upload-title">Build Your Digital Wardrobe</h2>
+            <p class="upload-desc">Upload photos of your clothing items to unlock personalized outfit recommendations and smart wardrobe organization.</p>
+            
+            <form id="upload-form">
+                <input type="file" id="file-upload" name="file" style="display: none;" accept="image/*">
+                <div id="item-details" style="display: none;">
+                    <div class="form-group">
+                        <label for="item-name">Item Name</label>
+                        <input type="text" id="item-name" placeholder="e.g., Blue Denim Jacket" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="item-category">Category</label>
+                        <select id="item-category" class="form-input">
+                            <option value="">Select a category</option>
+                            <option value="t-shirt">T-Shirt</option>
+                            <option value="shirt">Shirt</option>
+                            <option value="pants">Pants</option>
+                            <option value="jeans">Jeans</option>
+                            <option value="shorts">Shorts</option>
+                            <option value="dress">Dress</option>
+                            <option value="skirt">Skirt</option>
+                            <option value="jacket">Jacket</option>
+                            <option value="coat">Coat</option>
+                            <option value="sweater">Sweater</option>
+                            <option value="hoodie">Hoodie</option>
+                            <option value="activewear">Activewear</option>
+                            <option value="shoes">Shoes</option>
+                            <option value="accessories">Accessories</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="upload-btn">Submit Item</button>
+                </div>
+                <label for="file-upload" class="upload-btn" id="upload-btn">
+                    <i class="fas fa-camera"></i> Upload Your Clothes
+                </label>
+                <div id="upload-progress" style="margin-top: 20px; display: none;">
+                    <progress value="0" max="100" style="width: 100%; height: 10px; border-radius: 5px;"></progress>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">Uploading... <span id="progress-percent">0</span>%</p>
+                </div>
+                <div id="upload-result" style="margin-top: 15px; color: white;"></div>
+            </form>
+            
+            <p class="file-requirements">Supported formats: JPG, PNG. Max file size: 5MB</p>
+        </div>
+    </div>
+</section>
+
+    <section class="trends" id="trends">
+        <div class="container">
+            <h2 class="section-title">NEW TRENDS</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><img src="https://i.pinimg.com/736x/c4/cf/88/c4cf88ee055fcec20f8831b51cfa72ef.jpg" height="50%" width="50%"></div>
+                    <h3 class="feature-title">Bohemian Daydream</h3>
+                    <p>Sheer fabrics and handicraft detailing abounded in the Chloé, Valentino, Fendi, and Armani collections, which went heavy on beading and embroidery grounded by more solid footwear</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGNOy_PVOaG2fvO-SM0u_YvuhE1EkfX-uVmA&s" height="50%" width="50%"></div>
+                    <h3 class="feature-title">Elevated Athleisure</h3>
+                    <p>Sheer fabrics and handicraft detailing abounded in the Chloé, Valentino, Fendi, and Armani collections, which went heavy on beading and embroidery grounded by more solid footwear</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGkqDmcKvJIhNHpduTn6t5UwfjBB2egOQtIw&s" height="50%" width="50%"></div>
+                    <h3 class="feature-title">Coastal Cool</h3>
+                    <p>Mixing equal parts nautical style and East Coast prep, this trend popped up at cool-girl brands like Miu Miu, Sacai, and Proenza Schouler—meaning that it’s primed to be absolutely everywhere in the months ahead</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROUjli4_HSzNYBC-f-p1Q9tb8R9DM2MdC9Kg&s" height="50%" width="50%"></div>
+                    <h3 class="feature-title">Pretty Pastels</h3>
+                    <p>Chanel, Giambattista Valli, and Brandon Maxwell showed petal pink; pistachio green popped up at Tove, Tibi, and Simone Rocha; Tory Burch and Stella McCartney went with soft blue. And butter yellow is poised to top them all after appearing at Chloé, Balenciaga</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><img src="https://m.media-amazon.com/images/I/81UfpFs38kL._AC_UY1100_.jpg" height="50%" width="50%"></div>
+                    <h3 class="feature-title">Slim-cut pants</h3>
+                    <p>Featured heavily at Prada, McQueen, Sportmax, Mugler, and Aaron Esh; Meghan Markle, meanwhile, is a huge fan of Frame’s Alix skinnies. The distinction between straight, slim, and skinny varies wildly, but each of the picks fits tight through the thighs and begins to flare ever so subtly through the leg</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5QLaTHejScpr9cgkCbOs3jm8Lx6mfdA2L4g&s" height="50%" width="50%"></div>
+                    <h3 class="feature-title">Vintage Florals</h3>
+                    <p>Flowery prints twisted off in exciting directions well worth your attention. Prada, Loewe, and Versace are just the start; Glamour editors noticed so many retro, wallpaper-esque florals at Fashion Week, and more accessible brands are following suit</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <br><br>
+    
+
+    <section class="how-it-works" id="shop" style="background-color: #102C57; color: white; position: relative; overflow: hidden;">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">SHOPPING SUGGESTIONS</h2>
+            <div class="steps">
+                <div class="step" style="background: rgba(255,255,255,0.1); border-color: #1679AB;">
+                    <div class="step-number">🛍️</div>
+                    <h3 class="step-title" style="color: #6ec75c">Shopping Near You</h3>
+                    <p>Discover trendy boutiques and stores near your location—click to explore!
+                        <br><br><a href="https://www.google.com/search?q=shopping+near+me" target="_blank" style="color: #6ec75c; font-weight: 600;">All shopping areas near you</a></p>
+                </div>
+                <div class="step" style="background: rgba(255,255,255,0.1); border-color: #1679AB;">
+                    <div class="step-number">🛒</div>
+                    <h3 class="step-title" style="color: #FF9900;">Amazon</h3>
+                    <p>Discover everything from global brands to hidden gems with fast delivery
+                        <br><br><a href="https://www.amazon.in/" target="_blank" style="color: #FF9900; font-weight: 600;">Shop on Amazon</a></p>
+                </div>
+                <div class="step" style="background: rgba(255,255,255,0.1); border-color: #1679AB;">
+                    <div class="step-number">👗</div>
+                    <h3 class="step-title" style="color: #FF3E6C;">Myntra</h3>
+                    <p>Curated style heaven - Shop the latest trends handpicked by fashion experts
+                        <br><br><a href="https://www.myntra.com/" target="_blank" style="color: #FF3E6C; font-weight: 600;">Shop on Myntra</a></p>
+                </div>
+                <div class="step" style="background: rgba(255,255,255,0.1); border-color: #1679AB;">
+                    <div class="step-number">🤝</div>
+                    <h3 class="step-title" style="color: #047BD5;">Flipkart</h3>
+                    <p>Trendy steals & deal drops - Score budget-friendly fashion with next-day delivery
+                        <br><br><a href="https://www.flipkart.com/" target="_blank" style="color: #047BD5; font-weight: 600;">Shop on Flipkart</a></p>
+                </div>
+            </div>
+        </div>
+        <style>
+            #shop::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100px;
+                background: #f8f9fa;
+                clip-path: polygon(0 0, 100% 100%, 0 100%);
+                z-index: 0;
+            }
+            #shop .step:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 40px rgba(22, 121, 171, 0.3);
+            }
+            #shop a:hover {
+                text-decoration: underline;
+                opacity: 0.9;
+            }
+        </style>
+    </section>
+    <br><br>
+    <hr color="#102C57">
+    <!-- Future Scope -->
+    <section class="future-scope" id="future">
+        <div class="container">
+            <h2 class="section-title">COMING SOON</h2>
+            <p class="section-subtitle">Exciting new features we're working on to make SmartStyle even better</p>
+            <div class="future-cards">
+                <div class="future-card">
+                    <div class="future-number">01</div>
+                    <h3>AR Virtual Try-On</h3>
+                    <p>See how outfits will look on you in real-time using augmented reality technology before you even put them on.</p>
+                </div>
+                <div class="future-card">
+                    <div class="future-number">02</div>
+                    <h3>E-commerce Integration</h3>
+                    <p>Seamlessly shop recommended items and complete outfits directly through the app with our partner stores.</p>
+                </div>
+                <div class="future-card">
+                    <div class="future-number">03</div>
+                    <h3>Weekly Outfit Planner</h3>
+                    <p>Automatically plan your outfits for the entire week based on your schedule, weather, and clothing preferences.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">WHAT TEENS ARE SAYING</h2>
+            <p class="section-subtitle">Don't just take our word for it—hear from our users</p>
+            <div class="testimonial-grid">
+                <div class="testimonial">
+                    <p class="testimonial-text">SmartStyle completely changed how I approach fashion. I rediscovered so many forgotten items in my closet and now I get compliments daily on my outfits!</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">A</div>
+                        <div class="author-info">
+                            <h4>Sampriti Sen</h4>
+                            <p>Age 16, Fashion Enthusiast</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">I used to stress about what to wear every morning, SmartStyle has been a game-changer. I now have perfect outfits ready in seconds!</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">M</div>
+                        <div class="author-info">
+                            <h4>Ishanvi Murarka</h4>
+                            <p>Age 17, Busy Student</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">The shopping suggestions actually match my style and budget. I've never been happier with my wardrobe choices and I'm saving money too!</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">P</div>
+                        <div class="author-info">
+                            <h4>Priya Mehta</h4>
+                            <p>Age 15, Budget Shopper</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container newsletter-container">
+            <h2>Stay Updated</h2>
+            <p>Subscribe to our newsletter for the latest fashion tips, app updates, and exclusive offers.</p>
+            <form id="newsletter-form" class="newsletter-form">
+                <input type="email" id="newsletter-email" placeholder="Your email address" class="newsletter-input" required>
+                <button type="submit" class="newsletter-btn">Subscribe</button>
+            </form>
+            <div id="subscription-result" style="margin-top: 15px; color: white;"></div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column footer-about">
+                    <h3>About SmartStyle</h3>
+                    <p>SmartStyle is an AI-powered fashion assistant created by teens, for teens. Our mission is to make fashion fun, easy, and accessible for everyone.</p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/smartstyle_mhs/" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#" id="wardrobe-link">My Wardrobe</a></li>
+                        <li><a href="#wardrobe">Wardrobe Upload</a></li>
+                        <li><a href="#trends">Trends</a></li>
+                        <li><a href="#shop">Shopping</a></li>
+                        <li><a href="#future">Future</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column footer-contact">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-envelope"></i><a href="mailto:smartstylemhs@gmail.com">smartstylemhs@gmail.com</a></p>
+                    <p><i class="fas fa-phone"></i> 7439076393</p>
+                    <p><i class="fas fa-phone"></i> 8420088885</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Modern High School for Girls</p>
+                </div>
+            </div>
+            <center>
+                <div class="contact1">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3685.1791357288207!2d88.3619963750766!3d22.5349613795185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a0276df38ffd3a9%3A0x1cb3b01f0fbb090f!2sModern%20High%20School%20for%20Girls!5e0!3m2!1sen!2sin!4v1745642962253!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </center>
+            <div class="copyright">
+                &copy; 2025 SmartStyle. All rights reserved. Created by Mridu Patodia & Asaawari Sahai for X Hack - X Celsior 2025.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 class="modal-title">Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="form-submit">Login</button>
+                <div class="form-footer">
+                    Don't have an account? <a href="#" id="show-register-link">Register</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 class="modal-title">Register</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <button type="submit" class="form-submit">Register</button>
+                <div class="form-footer">
+                    Already have an account? <a href="#" id="show-login-link">Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="profile-page" style="display: none; padding: 100px 0;">
+        <div class="container">
+            <h2 class="section-title">My Wardrobe</h2>
+            <div class="color-filters">
+                <button class="color-filter active" data-color="all">All Colors</button>
+                <button class="color-filter" data-color="red">Brown</button>
+                <button class="color-filter" data-color="blue">Blue</button>
+                <button class="color-filter" data-color="green">Green</button>
+                <button class="color-filter" data-color="black">Black</button>
+                <button class="color-filter" data-color="white">White</button>
+                <button class="color-filter" data-color="yellow">Yellow</button>
+                <button class="color-filter" data-color="orange">Orange</button>
+                <button class="color-filter" data-color="purple">Purple</button>
+                <button class="color-filter" data-color="brown">Red</button>
+                <button class="color-filter" data-color="pink">Pink</button>
+                <button class="color-filter" data-color="gray">Gray</button>
+                <!-- Add more color filters as needed -->
+            </div>
+            <div id="outfits-section" style="margin-top: 40px;">
+                <h2>Outfit Suggestions</h2>
+                <div class="style-filters">
+                    <button class="style-filter active" data-style="all">All Styles</button>
+                    <button class="style-filter" data-style="business">Business</button>
+                    <button class="style-filter" data-style="formal">Formal</button>
+                    <button class="style-filter" data-style="casual">Casual</button>
+                    <button class="style-filter" data-style="business casual">Business Casual</button>
+                </div>
+                <div id="outfits-container"></div>
+            </div>
+            <div id="wardrobe-grid" class="wardrobe-grid" style="margin-top: 30px;">
+                <!-- Wardrobe items will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database Simulation (using localStorage)
+        class Database {
+            constructor() {
+                this.users = JSON.parse(localStorage.getItem('smartstyle_users')) || [];
+                this.wardrobe = JSON.parse(localStorage.getItem('smartstyle_wardrobe')) || [];
+                this.newsletter = JSON.parse(localStorage.getItem('smartstyle_newsletter')) || [];
+            }
+
+            saveUsers() {
+                localStorage.setItem('smartstyle_users', JSON.stringify(this.users));
+            }
+
+            saveWardrobe() {
+                localStorage.setItem('smartstyle_wardrobe', JSON.stringify(this.wardrobe));
+            }
+
+            saveNewsletter() {
+                localStorage.setItem('smartstyle_newsletter', JSON.stringify(this.newsletter));
+            }
+
+            // User methods
+            createUser(username, email, password) {
+                if (this.users.some(u => u.username === username || u.email === email)) {
+                    throw new Error('Username or email already exists');
+                }
+                
+                const user = {
+                    id: Date.now().toString(),
+                    username,
+                    email,
+                    password: this.hashPassword(password),
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.users.push(user);
+                this.saveUsers();
+                return user;
+            }
+
+            authenticateUser(username, password) {
+                const user = this.users.find(u => u.username === username);
+                if (!user || !this.verifyPassword(password, user.password)) {
+                    throw new Error('Invalid username or password');
+                }
+                return user;
+            }
+
+            hashPassword(password) {
+                // In a real app, use a proper hashing algorithm like bcrypt
+                return btoa(password);
+            }
+
+            verifyPassword(password, hashedPassword) {
+                return btoa(password) === hashedPassword;
+            }
+
+            // Wardrobe methods
+            addClothingItem(userId, itemData) {
+                const item = {
+                    id: Date.now().toString(),
+                    userId,
+                    ...itemData,
+                    createdAt: new Date().toISOString(),
+                    lastWorn: null
+                };
+                
+                this.wardrobe.push(item);
+                this.saveWardrobe();
+                return item;
+            }
+
+            getUserWardrobe(userId) {
+                return this.wardrobe.filter(item => item.userId === userId);
+            }
+
+            // Newsletter methods
+            subscribeEmail(email) {
+                if (this.newsletter.includes(email)) {
+                    throw new Error('Email already subscribed');
+                }
+                
+                this.newsletter.push(email);
+                this.saveNewsletter();
+                return email;
+            }
+        }
+
+        // AI Services Simulation
+        class AIServices {
+            constructor() {
+                this.colorDetector = new ColorDetector();
+                // Simulated categories and styles
+                this.categories = [
+                    't-shirt', 'shirt', 'pants', 'jeans', 'shorts', 
+                    'dress', 'skirt', 'jacket', 'coat', 'sweater',
+                    'hoodie', 'activewear', 'shoes', 'accessories'
+                ];
+                
+                this.styles = [
+                    'casual', 'formal', 'business', 'business casual', 
+                ];
+                
+                this.colors = [
+                    'red', 'blue', 'green', 'black', 'white',
+                    'gray', 'yellow', 'pink', 'purple', 'brown', 'orange'
+                ];
+            }
+
+            analyzeImage(file) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // Get colors but don't randomize category
+            const randomStyle = this.styles[
+                Math.floor(Math.random() * this.styles.length)
+            ];
+            
+            // Get 1-2 random colors
+            const colorCount = Math.random() > 0.5 ? 2 : 1;
+            const randomColors = [];
+            for (let i = 0; i < colorCount; i++) {
+                const color = this.colors[
+                    Math.floor(Math.random() * this.colors.length)
+                ];
+                if (!randomColors.includes(color)) {
+                    randomColors.push(color);
+                }
+            }
+            
+            resolve({
+                // Don't include category here - we'll use the selected one
+                style: randomStyle,
+                colors: randomColors
+            });
+        }, 1500);
+    });
+}
+
+            generateRecommendations(wardrobe, occasion = 'casual', weather = 'moderate') {
+                // Filter items by occasion and weather (simplified)
+                const occasionItems = {
+                    casual: ['t-shirt', 'jeans', 'shorts', 'hoodie'],
+                    formal: ['shirt', 'dress', 'pants', 'coat'],
+                    work: ['shirt', 'pants', 'skirt', 'sweater'],
+                    party: ['dress', 'shirt', 'accessories'],
+                    sport: ['activewear', 'shorts', 'hoodie']
+                };
+                
+                const weatherItems = {
+                    cold: ['sweater', 'coat', 'jacket'],
+                    moderate: ['shirt', 'pants', 'dress'],
+                    hot: ['t-shirt', 'shorts', 'skirt']
+                };
+                
+                // Filter wardrobe items
+                const filteredItems = wardrobe.filter(item => 
+                    occasionItems[occasion].includes(item.category) && 
+                    weatherItems[weather].includes(item.category)
+                );
+                
+                // Generate 3 recommendations
+                const recommendations = [];
+                for (let i = 0; i < 3; i++) {
+                    if (filteredItems.length >= 3) {
+                        // Create an outfit with 3-5 items
+                        const outfitItems = [];
+                        const categoriesUsed = new Set();
+                        
+                        // Shuffle items
+                        const shuffledItems = [...filteredItems].sort(() => 0.5 - Math.random());
+                        
+                        for (const item of shuffledItems) {
+                            if (!categoriesUsed.has(item.category)) {
+                                outfitItems.push(item);
+                                categoriesUsed.add(item.category);
+                                
+                                if (outfitItems.length >= 3) break;
+                            }
+                        }
+                        
+                        if (outfitItems.length >= 2) {
+                            recommendations.push({
+                                items: outfitItems,
+                                confidence: Math.min(0.9, outfitItems.length / 3).toFixed(2),
+                                occasion,
+                                weatherAppropriate: true
+                            });
+                        }
+                    }
+                }
+                
+                return recommendations;
+            }
+            async analyzeImage(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = async () => {
+                    // Get colors from the enhanced color detector
+                    const colors = await this.colorDetector.detectColors(img);
+                    
+                    // Get random category and style (for simulation)
+                    const randomCategory = this.categories[
+                        Math.floor(Math.random() * this.categories.length)
+                    ];
+                    
+                    const randomStyle = this.styles[
+                        Math.floor(Math.random() * this.styles.length)
+                    ];
+                    
+                    resolve({
+                        category: randomCategory,
+                        style: randomStyle,
+                        colors: colors.length ? colors : ['unknown']
+                    });
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+        }
+
+        // Main Application
+        class SmartStyleApp {
+            constructor() {
+                this.db = new Database();
+                this.ai = new AIServices();
+                this.outfitGenerator = new OutfitGenerator();
+                this.currentUser = null;
+                this.initWardrobeLink();
+                
+                // Initialize the app
+                this.initAuth();
+                this.initFileUpload();
+                this.initNewsletter();
+                this.initModals();
+                this.initScrollToTop();
+            }
+
+            initWardrobeLink() {
+        document.getElementById('wardrobe-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            if (!this.currentUser) {
+                this.showToast('Please login to view your wardrobe', 'error');
+                this.openModal('login-modal');
+                return;
+            }
+            
+            this.showProfilePage();
+        });
+    }
+
+            initStyleFilters() {
+    document.querySelectorAll('.style-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.style-filter').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            
+            const style = btn.dataset.style;
+            const activeColorBtn = document.querySelector('.color-filter.active');
+            const color = activeColorBtn ? activeColorBtn.dataset.color : 'all';
+            
+            this.loadWardrobeItems(color, style);
+        });
+    });
+}
+            // Add this method to your SmartStyleApp class
+logWardrobeClassification() {
+    if (!this.currentUser) return;
+    
+    const rawWardrobe = this.db.getUserWardrobe(this.currentUser.id);
+    const classifier = new ClothingClassifier();
+    const classifiedWardrobe = rawWardrobe.map(item => classifier.classifyItem(item));
+    
+    console.log("Wardrobe Classification:");
+    classifiedWardrobe.forEach(item => {
+        console.log(`- ${item.name}: Type=${item.type}, Styles=${item.styles.join(', ')}`);
+    });
+}
+
+// Call this after wardrobe uploads or when debugging
+// app.logWardrobeClassification();
+showOutfitSuggestions(style = 'business') {
+    if (!this.currentUser) return;
+    
+    const wardrobe = this.db.getUserWardrobe(this.currentUser.id);
+    const outfits = this.outfitGenerator.generateOutfits(wardrobe, style);
+    
+    const outfitsContainer = document.getElementById('outfits-container');
+    outfitsContainer.innerHTML = '';
+    
+    if (outfits.length === 0) {
+        outfitsContainer.innerHTML = `
+            <div class="no-outfits">
+                <i class="fas fa-tshirt"></i>
+                <p>No ${style} outfits found.</p>
+                <p>Add more ${style} items to your wardrobe.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    outfits.forEach(outfit => {
+        const outfitElement = document.createElement('div');
+        outfitElement.className = 'outfit';
+        outfitElement.innerHTML = `
+            <div class="outfit-header">
+                <span class="outfit-style ${outfit.style}">${outfit.style}</span>
+                <span class="outfit-confidence">${Math.round(outfit.confidence * 100)}% match</span>
+            </div>
+            <p class="outfit-desc">${outfit.description}</p>
+            <div class="outfit-items">
+                ${outfit.items.map(item => `
+                    <div class="outfit-item">
+                        <img src="${item.imagePath}" alt="${item.name}">
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-type">${item.category}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="save-outfit">
+                <i class="fas fa-heart"></i> Save Outfit
+            </button>
+        `;
+        outfitsContainer.appendChild(outfitElement);
+    });
+}
+            initAuth() {
+                // Check if user is already logged in
+                const token = localStorage.getItem('smartstyle_token');
+                if (token) {
+                    try {
+                        this.currentUser = JSON.parse(token);
+                        this.updateAuthUI();
+                    } catch (e) {
+                        localStorage.removeItem('smartstyle_token');
+                    }
+                }
+                
+                // Login form
+                document.getElementById('login-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+                    
+                    try {
+                        const user = this.db.authenticateUser(username, password);
+                        this.currentUser = user;
+                        localStorage.setItem('smartstyle_token', JSON.stringify(user));
+                        this.updateAuthUI();
+                        this.closeModal('login-modal');
+                        this.showToast('Login successful!');
+                    } catch (error) {
+                        this.showToast(error.message, 'error');
+                    }
+                });
+                
+                // Register form
+                document.getElementById('register-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('register-username').value;
+                    const email = document.getElementById('register-email').value;
+                    const password = document.getElementById('register-password').value;
+                    
+                    try {
+                        const user = this.db.createUser(username, email, password);
+                        this.showToast('Registration successful! Please login.');
+                        this.closeModal('register-modal');
+                        this.openModal('login-modal');
+                    } catch (error) {
+                        this.showToast(error.message, 'error');
+                    }
+                });
+                
+                // Auth button in header
+                document.getElementById('auth-button').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.currentUser) {
+                        this.logout();
+                    } else {
+                        this.openModal('login-modal');
+                    }
+                });
+            }
+            
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('smartstyle_token');
+                this.updateAuthUI();
+                this.showToast('Logged out successfully');
+            }
+            
+            updateAuthUI() {
+                const authButton = document.getElementById('auth-button');
+                if (this.currentUser) {
+                    authButton.textContent = 'Logout';
+                } else {
+                    authButton.textContent = 'Login';
+                }
+            }
+            
+// In the initFileUpload method of SmartStyleApp class:
+            initFileUpload() {
+    const fileInput = document.getElementById('file-upload');
+    const itemDetails = document.getElementById('item-details');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadResult = document.getElementById('upload-result');
+    
+    fileInput.addEventListener('change', (e) => {
+        if (!this.currentUser) {
+            this.showToast('Please login to upload items', 'error');
+            fileInput.value = '';
+            return;
+        }
+        
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Show item details form
+        itemDetails.style.display = 'block';
+        uploadBtn.style.display = 'none';
+    });
+    
+    // Handle form submission
+document.getElementById('upload-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = fileInput.files[0];
+    const name = document.getElementById('item-name').value || 'My Clothing Item';
+    const category = document.getElementById('item-category').value;
+    
+    if (!category) {
+        this.showToast('Please select a category', 'error');
+        return;
+    }
+    
+    const uploadProgress = document.getElementById('upload-progress');
+    const progressBar = uploadProgress.querySelector('progress');
+    const percentText = document.getElementById('progress-percent');
+    
+    uploadProgress.style.display = 'block';
+    uploadResult.innerHTML = '';
+    
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        progressBar.value = progress;
+        percentText.textContent = progress;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            this.processUpload(file, name, category); // Pass the selected category
+        }
+    }, 200);
+}); }
+
+// Update the processUpload method:
+async processUpload(file, name, category) {
+    const uploadResult = document.getElementById('upload-result');
+    
+    try {
+        uploadResult.innerHTML = '<p style="color: white;">Processing your item with AI...</p>';
+        
+        // Get color/style analysis but USE THE SELECTED CATEGORY
+        const analysis = await this.ai.analyzeImage(file);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target.result;
+            
+            // Use the user-selected category instead of random one
+            const itemData = {
+                name: name,
+                category: category, // Use the selected category
+                color: analysis.colors.join(', '),
+                style: analysis.style,
+                imagePath: imageUrl
+            };
+            
+            // Save to database
+            const item = this.db.addClothingItem(this.currentUser.id, itemData);
+            
+            // Show results with the actual category used
+            uploadResult.innerHTML = `
+                <div style="color: white;">
+                    <p>Item added successfully as ${category}!</p>
+                    <div style="display: flex; margin-top: 15px;">
+                        <div style="width: 100px; height: 100px; margin-right: 15px;">
+                            <img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <p><strong>${name}</strong></p>
+                            <p>Category: ${category}</p>
+                            <p>Style: ${analysis.style}</p>
+                            <p>Colors: ${analysis.colors.map(c => 
+                                `<span style="color: ${c}; font-weight: bold;">${c}</span>`
+                            ).join(', ')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Reset form
+            document.getElementById('file-upload').value = '';
+            document.getElementById('item-name').value = '';
+            document.getElementById('item-category').value = '';
+            document.getElementById('item-details').style.display = 'none';
+            document.getElementById('upload-btn').style.display = 'block';
+            document.getElementById('upload-progress').style.display = 'none';
+            
+            setTimeout(() => {
+                this.showProfilePage();
+            }, 2000);
+        };
+        reader.readAsDataURL(file);
+        
+    } catch (error) {
+        uploadResult.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+        document.getElementById('upload-progress').style.display = 'none';
+    }
+}
+
+            async processUpload(file, name) {
+    const uploadResult = document.getElementById('upload-result');
+    
+    try {
+        uploadResult.innerHTML = '<p style="color: white;">Processing your item with AI...</p>';
+        
+        const analysis = await this.ai.analyzeImage(file);
+        const classifier = new ClothingClassifier();
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target.result;
+            
+            // Create initial item data
+            const itemData = {
+                name: name,
+                category: analysis.category,
+                color: analysis.colors.join(', '),
+                imagePath: imageUrl
+            };
+            
+            // Classify the item
+            const classifiedItem = classifier.classifyItem(itemData);
+            
+            // Save to database with style information
+            const item = this.db.addClothingItem(this.currentUser.id, {
+                ...itemData,
+                style: classifiedItem.style,
+                styles: classifiedItem.styles
+            });
+            
+            // Show results
+            uploadResult.innerHTML = `
+                <div style="color: white;">
+                    <p>Item added successfully!</p>
+                    <div style="display: flex; margin-top: 15px;">
+                        <div style="width: 100px; height: 100px; margin-right: 15px;">
+                            <img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <p><strong>${name}</strong></p>
+                            <p>Category: ${analysis.category}</p>
+                            <p>Style: ${classifiedItem.style}</p>
+                            <p>Colors: ${analysis.colors.join(', ')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Reset form and redirect
+            document.getElementById('file-upload').value = '';
+            document.getElementById('item-name').value = '';
+            document.getElementById('item-name').style.display = 'none';
+            document.getElementById('upload-btn').innerHTML = '<i class="fas fa-camera"></i> Upload Your Clothes';
+            document.getElementById('upload-progress').style.display = 'none';
+            
+            setTimeout(() => {
+                this.showProfilePage();
+            }, 2000);
+        };
+        reader.readAsDataURL(file);
+    } catch (error) {
+        uploadResult.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+        document.getElementById('upload-progress').style.display = 'none';
+    }
+}
+            
+            initNewsletter() {
+                document.getElementById('newsletter-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('newsletter-email').value;
+                    const resultDiv = document.getElementById('subscription-result');
+                    
+                    try {
+                        this.db.subscribeEmail(email);
+                        resultDiv.textContent = 'Thank you for subscribing!';
+                        document.getElementById('newsletter-email').value = '';
+                    } catch (error) {
+                        resultDiv.textContent = error.message;
+                    }
+                });
+            }
+            
+            initModals() {
+                // Modal toggle functionality
+                document.getElementById('show-register-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closeModal('login-modal');
+                    this.openModal('register-modal');
+                });
+                
+                document.getElementById('show-login-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closeModal('register-modal');
+                    this.openModal('login-modal');
+                });
+                
+                // Close modals when clicking X or outside
+                document.querySelectorAll('.modal-close').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.closeModal(btn.closest('.modal').id);
+                    });
+                });
+                
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            this.closeModal(modal.id);
+                        }
+                    });
+                });
+            }
+            
+            openModal(id) {
+                document.getElementById(id).style.display = 'flex';
+            }
+            
+            closeModal(id) {
+                document.getElementById(id).style.display = 'none';
+            }
+            
+            initScrollToTop() {
+                const backToTopBtn = document.getElementById('backToTop');
+                
+                window.addEventListener('scroll', () => {
+                    if (window.pageYOffset > 300) {
+                        backToTopBtn.classList.add('active');
+                    } else {
+                        backToTopBtn.classList.remove('active');
+                    }
+                });
+                
+                backToTopBtn.addEventListener('click', () => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.right = '20px';
+                toast.style.padding = '10px 20px';
+                toast.style.background = type === 'success' ? '#4CAF50' : '#f44336';
+                toast.style.color = 'white';
+                toast.style.borderRadius = '5px';
+                toast.style.zIndex = '1000';
+                toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                toast.style.animation = 'fadeIn 0.3s';
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.3s';
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            }
+
+            async processUpload(file, name) {
+            const uploadResult = document.getElementById('upload-result');
+            
+            try {
+                uploadResult.innerHTML = '<p style="color: white;">Processing your item with AI...</p>';
+                
+                const analysis = await this.ai.analyzeImage(file);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    
+                    const item = this.db.addClothingItem(this.currentUser.id, {
+                        name,
+                        category: analysis.category,
+                        color: analysis.colors.join(', '),
+                        style: analysis.style,
+                        imagePath: imageUrl
+                    });
+                    
+                    // After successful upload, redirect to profile page
+                    this.showProfilePage();
+                };
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                uploadResult.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+            }
+        }
+            async processUpload(file, name) {
+            const uploadResult = document.getElementById('upload-result');
+            
+            try {
+                uploadResult.innerHTML = '<p style="color: white;">Processing your item with AI...</p>';
+                
+                const analysis = await this.ai.analyzeImage(file);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    
+                    const item = this.db.addClothingItem(this.currentUser.id, {
+                        name,
+                        category: analysis.category,
+                        color: analysis.colors.join(', '),
+                        style: analysis.style,
+                        imagePath: imageUrl
+                    });
+                    
+                    // Show color detection results
+                    uploadResult.innerHTML = `
+                        <div style="color: white;">
+                            <p>Item added successfully!</p>
+                            <div style="display: flex; margin-top: 15px;">
+                                <div style="width: 100px; height: 100px; margin-right: 15px;">
+                                    <img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
+                                </div>
+                                <div>
+                                    <p><strong>${name}</strong></p>
+                                    <p>Category: ${analysis.category}</p>
+                                    <p>Colors: ${analysis.colors.map(c => 
+                                        `<span style="color: ${c}; font-weight: bold;">${c}</span>`
+                                    ).join(', ')}</p>
+                                    <p>Style: ${analysis.style}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reset form
+                    document.getElementById('file-upload').value = '';
+                    document.getElementById('item-name').value = '';
+                    document.getElementById('item-name').style.display = 'none';
+                    document.getElementById('upload-btn').innerHTML = '<i class="fas fa-camera"></i> Upload Your Clothes';
+                    document.getElementById('upload-progress').style.display = 'none';
+                    
+                    // Redirect to profile page after 2 seconds
+                    setTimeout(() => {
+                        this.showProfilePage();
+                    }, 2000);
+                };
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                uploadResult.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+                document.getElementById('upload-progress').style.display = 'none';
+            }
+        }
+        
+        showProfilePage() {
+            // Hide all sections
+            document.querySelectorAll('section, footer').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show profile page
+            const profilePage = document.getElementById('profile-page');
+            profilePage.style.display = 'block';
+            
+            // Load wardrobe items
+            this.loadWardrobeItems();
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        // In the loadWardrobeItems method:
+        // In the loadWardrobeItems method:
+loadWardrobeItems(filterColor = 'all', filterStyle = 'all') {
+    if (!this.currentUser) return;
+    
+    const wardrobeGrid = document.getElementById('wardrobe-grid');
+    wardrobeGrid.innerHTML = '';
+    
+    let items = this.db.getUserWardrobe(this.currentUser.id);
+    
+    // Filter by color if needed
+    if (filterColor !== 'all') {
+        items = items.filter(item => 
+            item.color.toLowerCase().includes(filterColor)
+        );
+    }
+    
+    // Filter by style if needed (but we'll still show categories)
+    if (filterStyle !== 'all') {
+        items = items.filter(item => 
+            item.style && item.style.toLowerCase() === filterStyle.toLowerCase()
+        );
+    }
+    
+    // Group items by their actual category (from dropdown)
+    const categories = {};
+    items.forEach(item => {
+        if (!categories[item.category]) {
+            categories[item.category] = [];
+        }
+        categories[item.category].push(item);
+    });
+    
+    if (Object.keys(categories).length === 0) {
+        wardrobeGrid.innerHTML = `
+            <div class="no-items" style="grid-column: 1 / -1;">
+                <i class="fas fa-tshirt"></i>
+                <p>No items found</p>
+                <p>Try uploading more items to your wardrobe</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort categories alphabetically
+    const sortedCategories = Object.keys(categories).sort();
+    
+    // Create category sections
+    sortedCategories.forEach(category => {
+        const categoryElement = document.createElement('div');
+        categoryElement.className = 'wardrobe-category';
+        categoryElement.innerHTML = `
+            <h3 class="category-title">${this.formatCategoryName(category)}</h3>
+            <div class="category-items">
+                ${categories[category].map(item => this.createWardrobeItemCard(item)).join('')}
+            </div>
+        `;
+        wardrobeGrid.appendChild(categoryElement);
+    });
+}
+
+// Helper method to format category names
+formatCategoryName(category) {
+    const nameMap = {
+        't-shirt': 'T-Shirts',
+        'shirt': 'Shirts',
+        'pants': 'Pants',
+        'jeans': 'Jeans',
+        'shorts': 'Shorts',
+        'dress': 'Dresses',
+        'skirt': 'Skirts',
+        'jacket': 'Jackets',
+        'coat': 'Coats',
+        'sweater': 'Sweaters',
+        'hoodie': 'Hoodies',
+        'activewear': 'Activewear',
+        'shoes': 'Shoes',
+        'accessories': 'Accessories'
+    };
+    
+    return nameMap[category] || 
+           category.split('-').map(word => 
+               word.charAt(0).toUpperCase() + word.slice(1)
+           ).join(' ');
+}
+
+// Helper method to create item card
+createWardrobeItemCard(item) {
+    const colors = item.color.split(',').map(c => c.trim());
+    
+    return `
+        <div class="wardrobe-item">
+            <img src="${item.imagePath}" class="wardrobe-item-img" alt="${item.name}">
+            <div class="wardrobe-item-info">
+                <div class="wardrobe-item-name">${item.name}</div>
+                <div class="wardrobe-item-style style-tag ${item.style}">
+                    ${item.style}
+                </div>
+                <div class="wardrobe-item-colors">
+                    ${colors.map(color => `
+                        <div class="color-chip" style="background: ${color};" title="${color}"></div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+        
+        // Update the initColorFilters method:
+initColorFilters() {
+    document.querySelectorAll('.color-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.color-filter').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            
+            const color = btn.dataset.color;
+            const activeStyleBtn = document.querySelector('.style-filter.active');
+            const style = activeStyleBtn ? activeStyleBtn.dataset.style : 'all';
+            
+            this.loadWardrobeItems(color, style);
+        });
+    });
+}
+
+// Update the initStyleFilters method:
+initStyleFilters() {
+    document.querySelectorAll('.style-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.style-filter').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            
+            const style = btn.dataset.style;
+            const activeColorBtn = document.querySelector('.color-filter.active');
+            const color = activeColorBtn ? activeColorBtn.dataset.color : 'all';
+            
+            this.loadWardrobeItems(color, style);
+        });
+    });
+}}
+
+    // Update the initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        const app = new SmartStyleApp();
+        app.initColorFilters(); 
+        app.initStyleFilters();// Initialize color filters
+        
+        // Add back button functionality (optional)
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'back-to-home') {
+                // Show all sections
+                document.querySelectorAll('section, footer').forEach(el => {
+                    el.style.display = 'block';
+                });
+                
+                // Hide profile page
+                document.getElementById('profile-page').style.display = 'none';
+            }
+        });
+    });
+    class ColorDetector {
+        constructor() {
+            // Define color ranges in HSV (Hue, Saturation, Value)
+            this.colorRanges = {
+                red: { h: [0, 20], s: [50, 100], v: [20, 100] },
+                orange: { h: [20, 40], s: [50, 100], v: [20, 100] },
+                yellow: { h: [40, 70], s: [50, 100], v: [20, 100] },
+                green: { h: [70, 160], s: [40, 100], v: [20, 100] },
+                blue: { h: [160, 260], s: [40, 100], v: [20, 100] },
+                purple: { h: [260, 290], s: [40, 100], v: [20, 100] },
+                pink: { h: [290, 330], s: [40, 100], v: [20, 100] },
+                brown: { h: [10, 40], s: [50, 100], v: [10, 40] },
+                gray: { h: [0, 360], s: [0, 15], v: [10, 90] },
+                black: { h: [0, 360], s: [0, 100], v: [0, 10] },
+                white: { h: [0, 360], s: [0, 15], v: [90, 100] }
+            };
+            
+            this.colorNames = Object.keys(this.colorRanges);
+        }
+
+        // Convert RGB to HSV
+        rgbToHsv(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+            const d = max - min;
+            s = max === 0 ? 0 : d / max;
+            
+            if (max === min) {
+                h = 0; // achromatic
+            } else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            
+            return [h * 360, s * 100, v * 100];
+        }
+
+        // Get color name from HSV values
+        getColorName(h, s, v) {
+            for (const color of this.colorNames) {
+                const range = this.colorRanges[color];
+                if (
+                    h >= range.h[0] && h <= range.h[1] &&
+                    s >= range.s[0] && s <= range.s[1] &&
+                    v >= range.v[0] && v <= range.v[1]
+                ) {
+                    // Special case for brown vs. orange
+                    if (color === 'orange' && v < 50) return 'brown';
+                    return color;
+                }
+            }
+            return 'unknown';
+        }
+
+        // Detect dominant colors from an image
+        async detectColors(imageElement, count = 2) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 100; // Process smaller image for performance
+                canvas.height = 100;
+                
+                ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                
+                // Sample pixels and count colors
+                const colorCounts = {};
+                const step = 10; // Sample every 10th pixel for performance
+                
+                for (let i = 0; i < pixels.length; i += 4 * step) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    const [h, s, v] = this.rgbToHsv(r, g, b);
+                    const colorName = this.getColorName(h, s, v);
+                    
+                    if (colorName !== 'unknown') {
+                        colorCounts[colorName] = (colorCounts[colorName] || 0) + 1;
+                    }
+                }
+                
+                // Sort colors by frequency
+                const sortedColors = Object.entries(colorCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(entry => entry[0]);
+                
+                // Return top N colors
+                resolve(sortedColors.slice(0, count));
+            });
+        }
+    }
+    class ClothingClassifier {
+    constructor() {
+        this.styleRules = {
+            business: {
+                keywords: ['dress shirt', 'suit', 'blazer', 'slacks', 'loafers', 'tie', 'oxford', 'dress pants', 'button down', 'blouse'],
+                categories: ['shirt', 'pants', 'dress', 'blazer', 'suit']
+            },
+            formal: {
+                keywords: ['tuxedo', 'evening', 'gown', 'heels', 'bowtie', 'cocktail', 'formal', 'suit', 'dress'],
+                categories: ['dress', 'suit', 'heels']
+            },
+            casual: {
+                keywords: ['t-shirt', 'jeans', 'sneakers', 'hoodie', 'shorts', 'flip flops', 'sweatshirt', 'sweatpants', 'tank top'],
+                categories: ['t-shirt', 'jeans', 'hoodie', 'shorts']
+            }
+        };
+    }
+
+    classifyItem(item) {
+        const lowerName = item.name.toLowerCase();
+        const styles = [];
+        
+        // Check against each style's keywords and categories
+        for (const [style, rules] of Object.entries(this.styleRules)) {
+            const nameMatch = rules.keywords.some(keyword => lowerName.includes(keyword));
+            const categoryMatch = rules.categories.includes(item.category.toLowerCase());
+            
+            if (nameMatch || categoryMatch) {
+                styles.push(style);
+            }
+        }
+        
+        // Default to casual if no style detected
+        if (styles.length === 0) {
+            styles.push('casual');
+        }
+        
+        return {
+            ...item,
+            styles: styles,
+            style: styles[0] // Primary style
+        };
+    }
+}
+// Outfit Generator
+class OutfitGenerator {
+    constructor() {
+        this.styleRules = {
+            'business': {
+                description: "Professional office attire",
+                requiredTypes: ['dress-shirt', 'slacks', 'loafers'],
+                optionalTypes: ['blazer', 'tie'],
+                confidenceBoost: 0.1,
+                minItems: 3
+            },
+            'formal': {
+                description: "Special occasion attire",
+                requiredTypes: ['suit', 'dress-shirt', 'heels'],
+                optionalTypes: ['tie', 'dress'],
+                confidenceBoost: 0.15,
+                minItems: 3
+            },
+            'casual': {
+                description: "Everyday comfortable wear",
+                requiredTypes: ['t-shirt', 'jeans'],
+                optionalTypes: ['hoodie', 'sneakers'],
+                confidenceBoost: 0.05,
+                minItems: 2
+            },
+            'business-casual': {
+                description: "Smart casual office wear",
+                requiredTypes: ['polo', 'chinos'],
+                optionalTypes: ['cardigan', 'loafers'],
+                confidenceBoost: 0.08,
+                minItems: 2
+            }
+        };
+    }
+
+    generateOutfits(wardrobe, style) {
+        const rules = this.styleRules[style] || this.styleRules['business'];
+        const outfits = [];
+        
+        // Filter wardrobe for items that match the style
+        const styleItems = wardrobe.filter(item => {
+            return item.styles && item.styles.includes(style);
+        });
+        
+        // Group by item type
+        const itemsByType = {};
+        styleItems.forEach(item => {
+            if (!itemsByType[item.type]) {
+                itemsByType[item.type] = [];
+            }
+            itemsByType[item.type].push(item);
+        });
+        
+        // Generate multiple outfit variations
+        for (let i = 0; i < 3; i++) { // Generate 3 outfit attempts
+            const outfit = {
+                items: [],
+                style: style,
+                description: rules.description,
+                confidence: 1.0
+            };
+            
+            // Add required items
+            let missingRequired = 0;
+            rules.requiredTypes.forEach(type => {
+                if (itemsByType[type] && itemsByType[type].length > 0) {
+                    const randomItem = itemsByType[type][
+                        Math.floor(Math.random() * itemsByType[type].length)
+                    ];
+                    outfit.items.push(randomItem);
+                } else {
+                    missingRequired++;
+                }
+            });
+            
+            // Penalize missing required items
+            outfit.confidence -= (missingRequired / rules.requiredTypes.length) * 0.5;
+            
+            // Add optional items (50% chance for each)
+            rules.optionalTypes.forEach(type => {
+                if (Math.random() > 0.5 && itemsByType[type] && itemsByType[type].length > 0) {
+                    const randomItem = itemsByType[type][
+                        Math.floor(Math.random() * itemsByType[type].length)
+                    ];
+                    outfit.items.push(randomItem);
+                    outfit.confidence += rules.confidenceBoost;
+                }
+            });
+            
+            // Only keep outfits that meet minimum requirements
+            if (outfit.items.length >= rules.minItems) {
+                outfits.push(outfit);
+            }
+        }
+        
+        return outfits.sort((a, b) => b.confidence - a.confidence);
+    }
+}
+document.querySelectorAll('.occasion-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.occasion-filter').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            app.showOutfitSuggestions(btn.dataset.occasion);
+        });
+    });
+// Replace your existing occasion filter event listeners with this:
+document.querySelectorAll('.style-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.style-filter').forEach(b => {
+            b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        app.showOutfitSuggestions(btn.dataset.style);
+    });
+});
+class GeminiOutfitRecommender {
+  constructor(apiKey) {
+    this.genAI = new googleGenerativeAI(apiKey);
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    this.visionModel = this.genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+  }
+
+  async analyzeClothingItem(imageFile) {
+    const imageParts = await Promise.all([
+      this.fileToGenerativePart(imageFile),
+    ]);
+
+    const prompt = `
+      Analyze this clothing item and return JSON with:
+      - category (e.g., t-shirt, dress, jeans)
+      - primaryColor
+      - secondaryColors (array)
+      - style (e.g., casual, formal, business)
+      - seasonality (summer, winter, all-season)
+      - material (if detectable)
+      - patterns (if any)
+    `;
+
+    const result = await this.visionModel.generateContent([prompt, ...imageParts]);
+    const response = await result.response;
+    return JSON.parse(response.text());
+  }
+
+  async generateOutfits(wardrobeItems, stylePreferences) {
+    const prompt = `
+      You are a fashion AI assistant. Recommend 3 complete outfits using these items:
+      ${JSON.stringify(wardrobeItems, null, 2)}
+
+      User preferences:
+      - Style: ${stylePreferences.style || 'casual'}
+      - Color palette: ${stylePreferences.colors?.join(', ') || 'any'}
+      - Occasion: ${stylePreferences.occasion || 'daily wear'}
+
+      For each recommendation, return JSON with:
+      {
+        outfitId: string,
+        items: array of item IDs,
+        description: string,
+        styleMatchScore: number (0-1),
+        colorCoordination: string,
+        occasionSuitability: string,
+        confidence: number (0-1)
+      }
+    `;
+
+    const result = await this.model.generateContent(prompt);
+    const response = await result.response;
+    return JSON.parse(response.text());
+  }
+
+  async fileToGenerativePart(file) {
+    const base64EncodedDataPromise = new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.readAsDataURL(file);
+    });
+
+    return {
+      inlineData: {
+        data: await base64EncodedDataPromise,
+        mimeType: file.type,
+      },
+    };
+  }
+}
+
+// Initialize with your API key
+const outfitRecommender = new GeminiOutfitRecommender('AIzaSyCQiZaFIUqiFjUwdvru3HEgVKmyFqUzrNA');
+
+// Export for browser
+if (typeof window !== 'undefined') {
+  window.OutfitRecommender = outfitRecommender;
+}
+async function getRecommendations(wardrobeData) {
+  const response = await fetch('http://localhost:3001/api/recommend-outfits', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wardrobe: wardrobeData,
+      preferences: {
+        style: 'business',
+        colors: ['navy', 'gray']
+      }
+    })
+  });
+  return await response.json();
+}
+    </script>
+</body>
+</html>
